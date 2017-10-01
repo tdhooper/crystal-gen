@@ -1,0 +1,20 @@
+{
+  "name": "test",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "budo index.js --css /styles/main.css --live"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "budo": "^9.4.7",
+    "cga": "^1.0.8",
+    "mda": "^1.1.1",
+    "three": "^0.87.1",
+    "three-orbit-controls": "^82.1.0"
+  }
+}
