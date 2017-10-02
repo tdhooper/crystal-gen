@@ -1,12 +1,16 @@
 var THREE = require('three');
 var OrbitControls = require('three-orbit-controls')(THREE);
 var mda = require('mda');
+var Benchmark = require('benchmark');
+var crystalGen = require('./crystal-gen');
+
+window.Benchmark = Benchmark;
 
 var width = window.innerWidth;
 var height = window.innerHeight;
 
 var camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 1000);
-camera.position.z = 5;
+camera.position.x = 5;
 
 var controls = new OrbitControls(camera);
 
@@ -32,59 +36,45 @@ var icoGeom = new THREE.IcosahedronGeometry(1, 1);
 // var icoMesh = new THREE.Mesh(icoGeom, wireframeMaterial);
 // scene.add(icoMesh);
 
+var crystalSpec = {
+    sides: 3,
+    diameter: .2,
+    height: 1,
+    topFacets: 1
+};
 
-function polygon(sides, size) {
-    var points = Array.apply(null, Array(sides));
-    points = points.map(function(u, i) {
-        var angle = i / sides * Math.PI * 2.;
-        return [
-            Math.sin(angle) * size,
-            Math.cos(angle) * size
-        ];
-    });
-    return points;
-}
+var testThree = function() {
+    return crystalGen.create(crystalSpec, crystalGen.threeEngine);
+};
 
+var testMda = function() {
+    return crystalGen.create(crystalSpec, crystalGen.mdaEngine);
+};
 
-// var box = new THREE.IcosahedronGeometry(1);
+// var geometry = testThree();
+var geometry = testMda();
+var mesh = new THREE.Mesh(geometry, wireframeMaterial);
+scene.add(mesh);
 
-// var mesh = new mda.Mesh();
-// var vertices = box.vertices.map(function(vert) {
-//     return [vert.x, vert.y, vert.z];
-// });
-// var cells = box.faces.map(function(face) {
-//     return [face.a, face.b, face.c];
-// });
-// mesh.setPositions( vertices );
-// mesh.setCells( cells );
-// mesh.process();
+// var suite = new Benchmark.Suite;
 
-var shape = polygon(5, .5);
-var mesh = mda.ProfileGenerator(shape);
+// // add tests
+// suite.add('three', function() {
+//   testThree();
+// })
+// .add('mda', function() {
+//   testMda();
+// })
+// // add listeners
+// .on('cycle', function(event) {
+//   console.log(String(event.target));
+// })
+// .on('complete', function() {
+//   console.log('Fastest is ' + this.filter('fastest').map('name'));
+// })
+// // run async
+// .run({ 'async': true });
 
-mda.ExtrudeOperator(mesh, 0, 1, 0);
-
-// console.log(mesh)
-mda.MeshIntegrity(mesh);
-
-mda.TriangulateOperator(mesh);
-var positions = mesh.getPositions();
-var cells = mesh.getCells();
-
-var geometry = new THREE.Geometry();
-
-geometry.vertices = positions.map(function(position) {
-    return new THREE.Vector3().fromArray(position);
-});
-
-geometry.faces = cells.map(function(cell) {
-    return new THREE.Face3(cell[0], cell[1], cell[2]);
-});
-
-var threeMesh = new THREE.Mesh(geometry, wireframeMaterial);
-scene.add(threeMesh);
-
-// geometry.computeBoundingSphere();
 
 function render() {
     renderer.render(scene, camera);
