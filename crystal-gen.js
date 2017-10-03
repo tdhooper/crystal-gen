@@ -28,7 +28,7 @@ function create(spec, engine) {
     var shape = polygon(spec.sides, spec.diameter);
     var geometry = engine.extrude(shape, spec.height);
 
-    var point = new THREE.Vector3(0, 0, spec.height * .5);
+    var point = new THREE.Vector3(0, 0, spec.height * -1.5);
 
     var slope = .3;
     slope = 0.;
@@ -104,6 +104,7 @@ var mdaEngine = {
         var newPositions = [];
         var newFaces = [];
         var addedVerts = {};
+        var addedIntersections = {};
         var capFace = [];
 
         var vertDist = function(vert) {
@@ -117,7 +118,7 @@ var mdaEngine = {
             if (addedVerts.hasOwnProperty(index)) {
                 return addedVerts[index];
             }
-            var newIndex = newPositions.length
+            var newIndex = newPositions.length;
             addedVerts[index] = newIndex;
             newPositions.push(mesh.positions[index]);
             return newIndex;
@@ -137,20 +138,38 @@ var mdaEngine = {
             return v;
         };
 
+        var newIntersection = function(vert0, vert1, dist0, dist1) {
+            var index0 = vert0.index;
+            var index1 = vert1.index;
+            var hash = [
+                Math.min(index0, index1),
+                Math.max(index0, index1)
+            ].join(',');
+            if (addedIntersections.hasOwnProperty(hash)) {
+                return addedIntersections[hash];
+            }
+            var iv = intersect(vert0, vert1, dist0, dist1);
+            var newIndex = newVert(iv);
+            addedIntersections[hash] = newIndex;
+            return newIndex;
+        };
+
         mesh.faces.forEach(function(face) {
-            console.log('FACE');
             var newIndices = [];
+            console.log('FACE');
 
             mda.FaceHalfEdges(face).forEach(function(halfEdge) {
                 var verts = mda.EdgeVertices(halfEdge.edge);
 
+                console.log(verts[0].index, verts[1].index);
+
                 var dist0 = vertDist(verts[0]);
                 var dist1 = vertDist(verts[1]);
 
+                console.log(dist0, dist1);
+
                 if (dist0 > 0 && dist1 > 0) {
                     console.log('keep edge');
-
-                    console.log(verts)
 
                     newIndices.push(addVert(verts[0]));
                     newIndices.push(addVert(verts[1]));
@@ -160,16 +179,14 @@ var mdaEngine = {
 
                     newIndices.push(addVert(verts[0]));
 
-                    var iv = intersect(verts[0], verts[1], dist0, dist1);
-                    var vertIndex = newVert(iv);
+                    var vertIndex = newIntersection(verts[0], verts[1], dist0, dist1);
                     newIndices.push(vertIndex);
                     capFace.push(vertIndex);
 
                 } else if (dist0 <= 0 && dist1 > 0) {
                     console.log('intersect 0');
 
-                    var iv = intersect(verts[0], verts[1], dist0, dist1);
-                    var vertIndex = newVert(iv);
+                    var vertIndex = newIntersection(verts[0], verts[1], dist0, dist1);
                     newIndices.push(vertIndex);
                     capFace.push(vertIndex);
 
@@ -181,22 +198,20 @@ var mdaEngine = {
             });
 
             if (newIndices.length) {
-                console.log(newIndices);
                 newFaces.push(newIndices.filter(function(item, pos) {
                     return newIndices.indexOf(item) == pos;
                 }));
             }
         });
 
-        // newFaces.push(capFace.filter(function(item, pos) {
-        //     return capFace.indexOf(item) == pos;
-        // }));
+        newFaces.push(capFace.filter(function(item, pos) {
+            return capFace.indexOf(item) == pos;
+        }));
 
         console.log(newFaces);
-        console.log(newPositions)
-        console.log(capFace);
+        console.log(newPositions);
 
-        // newFaces.push(capFace);
+        newFaces[4] = [3, 5, 4];
 
         var newMesh = new mda.Mesh();
         newMesh.setPositions(newPositions);
@@ -205,7 +220,7 @@ var mdaEngine = {
 
         mda.MeshIntegrity(newMesh);
 
-        console.log(newMesh);
+        console.log(newMesh)
 
         return newMesh;
     },

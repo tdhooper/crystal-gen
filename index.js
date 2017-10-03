@@ -37,7 +37,7 @@ var icoGeom = new THREE.IcosahedronGeometry(1, 1);
 // scene.add(icoMesh);
 
 var crystalSpec = {
-    sides: 3,
+    sides: 4,
     diameter: .2,
     height: 1,
     topFacets: 1
@@ -53,7 +53,7 @@ var testMda = function() {
 
 // var geometry = testThree();
 var geometry = testMda();
-var mesh = new THREE.Mesh(geometry, wireframeMaterial);
+var mesh = new THREE.Mesh(geometry, material);
 scene.add(mesh);
 
 // var suite = new Benchmark.Suite;
