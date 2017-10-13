@@ -3,14 +3,14 @@ var mda = require('mda');
 var sliceThreeGeometry = require('threejs-slice-geometry')(THREE);
 var vec3 = require('gl-matrix').vec3;
 var ThreeBSP = require('three-js-csg')(THREE);
-
+var random = require('seed-random');
 
 
 function topPlane(slope, angle, point) {
     var normal = new THREE.Vector3(
         0,
-        Math.cos((slope - .5) * Math.PI),
-        Math.sin((slope - .5) * Math.PI)
+        Math.cos( (slope * .5 - .5) * Math.PI),
+        Math.sin( (slope * .5 - .5) * Math.PI)
     );
     normal.applyAxisAngle(
         new THREE.Vector3(0, 0, 1),
@@ -26,18 +26,39 @@ function topPlane(slope, angle, point) {
 
 function create(spec, engine) {
     var shape = polygon(spec.sides, spec.diameter);
-    var geometry = engine.extrude(shape, spec.height);
+    var rand = random(spec.seed, {entropy: true});
 
-    var point = new THREE.Vector3(0, 0, spec.height * -1.5);
+    shape.forEach(function(point) {        
+        point[0] += (rand() * 2 - 1) * .2 * spec.diameter;
+        point[1] += (rand() * 2 - 1) * .2 * spec.diameter;
+    });
 
-    var slope = .3;
-    slope = 0.;
+    console.log(shape);
+
+    var geometry = engine.extrude(shape, spec.height, spec.topScale);
+
+    var point = new THREE.Vector3(0, 0, spec.height);
+
+    var rot = (Math.PI * 2) / (spec.topFacets * 2);
 
     for (var i = 0; i < spec.topFacets; i++) {
-        var angle = i / spec.topFacets;
-        var plane = topPlane(slope, angle, point);
+        var offset = (rand() * 2 - 1) * .1;
+        var slopeOffset = (rand() * 2 - 1) * .1;
+        var angle = i / spec.topFacets + rot + offset;
+        var plane = topPlane(
+            spec.topSlope + slopeOffset,
+            angle,
+            point
+        );
         geometry = engine.slice(geometry, plane);
     }
+
+    var plane = topPlane(
+        spec.topSlope * .5,
+        0,
+        point.clone().multiplyScalar(.9)
+    );
+    geometry = engine.slice(geometry, plane);
 
     return engine.asThreeGeometry(geometry);
 }
@@ -53,7 +74,7 @@ var ThreeEngine = function() {
 
 ThreeEngine.prototype = {
 
-    extrude: function(shape, height) {
+    extrude: function(shape, height, scale) {
         var tShape = new THREE.Shape();
         tShape.moveTo(shape[0][0], shape[0][1]);
         shape.slice(1).forEach(function(point) {
@@ -65,6 +86,11 @@ ThreeEngine.prototype = {
             amount: height,
             bevelEnabled: false
         });
+        for (var i = 0; i < shape.length; i++) {
+            var v = geometry.vertices[i + shape.length];
+            v.x = v.x * scale;
+            v.y = v.y * scale;
+        }
         return new ThreeBSP(geometry);
     },
 

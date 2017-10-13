@@ -10,7 +10,7 @@ var width = window.innerWidth;
 var height = window.innerHeight;
 
 var camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 1000);
-camera.position.x = 5;
+camera.position.x = 10;
 
 var controls = new OrbitControls(camera);
 
@@ -37,10 +37,12 @@ var icoGeom = new THREE.IcosahedronGeometry(1, 1);
 // scene.add(icoMesh);
 
 var crystalSpec = {
-    sides: 4,
+    sides: 5,
     diameter: .2,
-    height: 1,
-    topFacets: 1
+    height: 2,
+    topSlope: .75,
+    topFacets: 3,
+    topScale: 1.5
 };
 
 var testThree = function() {
@@ -51,10 +53,32 @@ var testMda = function() {
     return crystalGen.create(crystalSpec, crystalGen.mdaEngine);
 };
 
-// var geometry = testThree();
-var geometry = testMda();
-var mesh = new THREE.Mesh(geometry, material);
-scene.add(mesh);
+var createCrystal = function(spec) {
+    return crystalGen.create(spec, crystalGen.threeEngine);
+};
+
+var steps = [4, 4];
+var size = [5, 5];
+for (var u = 0; u < steps[0]; u++) {
+    for (var v = 0; v < steps[1]; v++) {
+        var spec = {
+            sides: 5,
+            diameter: .15 + v * .05,
+            height: 1 + v * .5,
+            topSlope: .7,
+            topFacets: 3,
+            topScale: 1.7,
+            seed: u
+        };
+        var geometry = createCrystal(spec);
+        var mesh = new THREE.Mesh(geometry, material);
+        mesh.position.x = (u / (steps[0] - 1)) * size[0] - size[0] * 0.5;
+        mesh.position.z = (v / (steps[1] - 1)) * size[1] - size[1] * 0.5;
+        mesh.position.y = -1;
+        mesh.rotateX(Math.PI * -0.5);
+        scene.add(mesh);
+    }
+}
 
 // var suite = new Benchmark.Suite;
 

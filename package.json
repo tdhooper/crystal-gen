@@ -16,6 +16,7 @@
     "cga": "^1.0.8",
     "gl-matrix": "^2.4.0",
     "mda": "^1.1.1",
+    "seed-random": "^2.2.0",
     "three": "^0.87.1",
     "three-js-csg": "^72.0.0",
     "three-orbit-controls": "^82.1.0",
