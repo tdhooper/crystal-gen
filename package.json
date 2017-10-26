@@ -18,7 +18,7 @@
     "mda": "^1.1.1",
     "seed-random": "^2.2.0",
     "three": "^0.87.1",
-    "three-js-csg": "^72.0.0",
+    "ThreeCSG": "github:tdhooper/ThreeCSG",
     "three-orbit-controls": "^82.1.0",
     "threejs-slice-geometry": "^0.1.1"
   }

@@ -2,7 +2,7 @@ var THREE = require('three');
 var mda = require('mda');
 var sliceThreeGeometry = require('threejs-slice-geometry')(THREE);
 var vec3 = require('gl-matrix').vec3;
-var ThreeBSP = require('three-js-csg')(THREE);
+var ThreeBSP = require('ThreeCSG')(THREE);
 var random = require('seed-random');
 
 
@@ -42,7 +42,7 @@ function create(spec, engine) {
     var rot = (Math.PI * 2) / (spec.topFacets * 2);
 
     for (var i = 0; i < spec.topFacets; i++) {
-        var offset = (rand() * 2 - 1) * .1;
+        var offset = (rand() * 2 - 1) * .05;
         var slopeOffset = (rand() * 2 - 1) * .1;
         var angle = i / spec.topFacets + rot + offset;
         var plane = topPlane(
@@ -58,7 +58,7 @@ function create(spec, engine) {
         0,
         point.clone().multiplyScalar(.9)
     );
-    geometry = engine.slice(geometry, plane);
+    // geometry = engine.slice(geometry, plane);
 
     return engine.asThreeGeometry(geometry);
 }

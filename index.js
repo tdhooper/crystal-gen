@@ -25,12 +25,13 @@ var scene = new THREE.Scene();
 
 
 var material = new THREE.MeshNormalMaterial({
-    flatShading: true
+    flatShading: true,
 });
 
 var wireframeMaterial = new THREE.MeshNormalMaterial({
     wireframe: true
 });
+
 
 var icoGeom = new THREE.IcosahedronGeometry(1, 1);
 // var icoMesh = new THREE.Mesh(icoGeom, wireframeMaterial);
@@ -40,7 +41,7 @@ var crystalSpec = {
     sides: 5,
     diameter: .2,
     height: 2,
-    topSlope: .75,
+    topSlope: .5,
     topFacets: 3,
     topScale: 1.5
 };
@@ -67,7 +68,7 @@ for (var u = 0; u < steps[0]; u++) {
             height: 1 + v * .5,
             topSlope: .7,
             topFacets: 3,
-            topScale: 1.7,
+            topScale: 1.5,
             seed: u
         };
         var geometry = createCrystal(spec);
