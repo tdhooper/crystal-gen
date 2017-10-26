@@ -25,6 +25,7 @@ function topPlane(slope, angle, point) {
 }
 
 function create(spec, engine) {
+    var engine = engine || threeEngine;
     var shape = polygon(spec.sides, spec.diameter);
     var rand = random(spec.seed, {entropy: true});
 

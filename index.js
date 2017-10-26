@@ -55,7 +55,7 @@ var testMda = function() {
 };
 
 var createCrystal = function(spec) {
-    return crystalGen.create(spec, crystalGen.threeEngine);
+    return crystalGen.create(spec);
 };
 
 var steps = [4, 4];
